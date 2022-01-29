@@ -1,5 +1,8 @@
 import tensorflow as tf
 import math
+import preprocess_data
+
+x_train = preprocess_data.get_x_train
 
 x_train = 0 # The x_train data will be DF that only holds true value.
 
