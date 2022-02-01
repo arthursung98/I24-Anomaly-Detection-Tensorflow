@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 
 
-def get_x_train(filename):
+def load_data(filename):
   df = read_data(filename)
 
-  processed_data = []
+  x_train = []
   car_ids = np.unique(np.array(df['ID']))
 
   for one_id in car_ids:
@@ -19,12 +19,13 @@ def get_x_train(filename):
     while(max_frame - start_frame >= 50):
       df_50batch = one_car_df.iloc[start_frame: start_frame + 50]
       df_50batch_xcoord = np.array(df_50batch['x'])
-      processed_data.append(df_50batch_xcoord)
+      x_train.append(df_50batch_xcoord)
       start_frame += 50
 
-  processed_data = np.array(processed_data)
-  # pd.DataFrame(processed_data).to_csv('processed.csv')
-  return processed_data
+  x_train = np.array(x_train)
+  num_of_batch = int(x_train.size / 50)
+
+  return x_train, np.full((num_of_batch), 1.0)
 
 
 def read_data(filename):
