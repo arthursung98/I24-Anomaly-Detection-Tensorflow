@@ -1,31 +1,31 @@
 import tensorflow as tf
-import math
-import preprocess_data
+import preprocess
 
-x_train = preprocess_data.get_x_train
+# 1. Load data from Ground Truth data.
+x_train, y_train = preprocess.load_data('TM_1000_GT.csv')
 
-x_train = 0 # The x_train data will be DF that only holds true value.
-
-# Variable setup - Many are subject to change with experimentation
-entry_size, batch_size, input_size, hidden1_size, hidden2_size = 0,0,0,0,0
-
+# 2. Variable setup - Many are subject to change with experimentation
+input_size = 50
+output_size = 1
+data_size = int(x_train.size / input_size)
+batch_size = 100
+num_epochs = 50
+hidden1_size = 30
+hidden2_size = 10
 learning_rate = 0.02
 display_step = 1
+
+# 3. Transform x_train, y_train into tuple and shuffle the tuple.
+train_data = tf.data.Dataset.from_tensor_slices((x_train, y_train))
+train_data = train_data.shuffle(data_size).batch(batch_size)
 
 def random_normal_initializer() :
 	return tf.keras.initializers.RandomNormal(mean=0.0, stddev=1.0, seed=None)
 
-# Define AutoEncoder model using keras.
-class AutoEncoder(tf.keras.Model) :
-	def __init__(self, num_cars) :
-		super(AutoEncoder, self).__init__()
-
-		self.entry_size = num_cars
-		self.input_size = 15 * num_cars
-		self.batch_size = 1
-		hidden1_size = math.ceil(math.sqrt(input_size))
-		hidden2_size = hidden1_size / 2
-
+# 4. Define Artificial Neural Network model using keras.
+class ANN(tf.keras.Model) :
+	def __init__(self) :
+		super(ANN, self).__init__()
 		# Encoding Layers
 		self.hidden_layer_1 = tf.keras.layers.Dense(hidden1_size,
 																								activation='sigmoid',
@@ -35,30 +35,24 @@ class AutoEncoder(tf.keras.Model) :
 																								activation='sigmoid',
 																								kernel_initializer=random_normal_initializer(),
 																								bias_initializer=random_normal_initializer())
-		# Decoding Layers
-		self.hidden_layer_3 = tf.keras.layers.Dense(hidden1_size,
-																								activation='sigmoid',
-																								kernel_initializer=random_normal_initializer(),
+		self.output_layer = tf.keras.layers.Dense(output_size,
+																							activation=None,
+																							kernel_initializer=random_normal_initializer(),
 																								bias_initializer=random_normal_initializer())
-		self.output_layer = tf.keras.layers.Dense(input_size,
-                                                activation='sigmoid',
-                                                kernel_initializer=random_normal_initializer(),
-                                                bias_initializer=random_normal_initializer())
 
 	def call(self, x) :
 		H1_output = self.hidden_layer_1(x)
 		H2_output = self.hidden_layer_2(H1_output)
-		H3_output = self.hidden_layer_3(H2_output)
-		reconstructed_x = self.output_layer(H3_output)
+		logits = self.output_layer(H2_output)
 		
-		return reconstructed_x
+		return tf.nn.softmax(logits)
 
-# Define MSE Loss Function calculating cost.
+# 5. Define the Loss Function(Mean Squared Error) for calculating cost.
 @tf.function
 def mse_loss(y_pred, y_true):
   return tf.reduce_mean(tf.pow(y_true - y_pred, 2))
 
-# Define Optimizer & Training Step
+# 6. Define Optimizer & Training Step
 optimizer = tf.optimizers.RMSprop(learning_rate)
 
 @tf.function
