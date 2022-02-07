@@ -25,7 +25,7 @@ def process_data(filename, pollute_coefficient) :
     batch_size = 100
 
     for one_id in car_ids:
-        one_car_df = df.loc[df['ID'] == 100]
+        one_car_df = df.loc[df['ID'] == one_id]
         one_car_df = one_car_df.sort_values(by='Frame #').reset_index(drop=True)
 
         start_row, end_row = 0, int(one_car_df.size / 3)
