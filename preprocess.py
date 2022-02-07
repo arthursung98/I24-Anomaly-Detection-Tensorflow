@@ -5,7 +5,14 @@ import random
 input_directory = r"C:\I24 Motion Project\YB Outlier Detection\csv_data"
 
 def load_data(filename):
-    x_train, y_train = process_data('TM_1000_GT.csv', 0.0)
+    x_0, y_0 = process_data(filename, 0.0)
+    x_10, y_10 = process_data(filename, 0.1)
+    x_20, y_20 = process_data(filename, 0.2)
+    x_30, y_30 = process_data(filename, 0.3)
+    x_40, y_40 = process_data(filename, 0.4)
+    
+    x_train = np.concatenate((x_0,x_10,x_20,x_30,x_40))
+    y_train = np.concatenate((y_0,y_10,y_20,y_30,y_40))
     
     return x_train, y_train
 
